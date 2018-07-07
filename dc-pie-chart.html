@@ -1,0 +1,116 @@
+<!--## This dc-pie-chart lesson (from Code Institute Full-Stack Diploma course). Transcription from lessons, included in comments sections in the code.-->
+
+<!--Earlier we created three bar charts representing the dimensional data of person, store and state. Now let's try that using pie charts. Pie charts are a great way of representing data, especially if you want to easily convey visually the parts of a whole, and in our case we want to represent total spend by person total spend by state and total price spend by store. -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>D3 and Scalable Vector Graphics</title>
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/dc/2.1.8/dc.min.css"/>
+    <style>
+        div {
+            clear: left;
+        }
+    </style>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dc/2.1.8/dc.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/queue-async/1.0.7/queue.min.js"></script>
+
+</head>
+<body>
+    <h1>Data Visualisation</h1>
+
+    <h2>DC Pie Chart</h2>
+    
+    <!--let's do that now, it's create a div remember we need the div to target to provide a target for our chart and just like we did with the with the bar charts we're going to create three divs one for person one for store and one for state don't forget to rename your IDs if you're copying and pasting remember every element should have a unique ID you should never repeat an ID value on HTML elements.-->
+
+    <div>
+        <h3>Total Spend Per Person</h3>
+        <div id="per-person-chart"></div>
+    </div>
+
+    <div>
+        <h3>Total Spend Per Store</h3>
+        <div id="per-store-chart"></div>
+    </div>
+
+    <div>
+        <h3>Total Spend Per State</h3>
+        <div id="per-state-chart"></div>
+    </div>
+
+    <script>
+    queue()
+    //  Before we retrieve our json data, we need to use "mkdir data" on the command line and then "cd data" to change directory.  Then to quickly retrieve transactions.json data from GitHub, we use "wget https://raw.githubusercontent.com/Code-Institute-Solutions/DataVisualisation/master/data/transactions.json" to retrieve our raw json data". 
+        .defer(d3.json, "data/transactions.json")
+        .await(makeGraphs);
+
+    //  so queues in place as for our last example we have make graphs we create an instance of our cross filter object ndx.
+
+    function makeGraphs(error, transactionsData) {
+        var ndx = crossfilter(transactionsData);
+    
+    //  We then determine the dimension that we want to work with and we use DC to access our pluck our named dimension.
+    
+    //  Plucking name dimension and we're going to group by name and get a sum of spend by name so in order to do that we use the object created on above line, name_dim we group and then we reduce some based on spend. So basically it's saying group all the names and break it into spend per name. That then is available in total spent per person, which we will then use as a variable in our pie chart and we've been using them in our bar charts up until now as well.
+    
+        var name_dim = ndx.dimension(dc.pluck('name'));
+        
+    //  then 
+
+        var total_spend_per_person = name_dim.group().reduceSum(dc.pluck('spend'));
+        
+    //  So we create a new pie chart and we provide it with a div, that we want to target, we give the pie chart a height, and we give it a radius.  The height of the pie chart is the amount of real estate that it takes.  That's not to be confused with the radius of the pie chart, which I suppose is breathing space around the pie chart.  We then are provided with their dimension, what data are we working with and we're working with the named dimension, which was defined in "var name_dim = ndx.dimension(dc.pluck('name'))" above. We then we go to group, based on the variable defined and assigned in "var total_spend_per_person = name_dim.group().reduceSum(dc.pluck('spend'))".
+    
+        //  We for the most part copy and paste for the other two charts (Store and State Dimensions). 
+    
+        //  Nice easing functions those transitions and translations and transformations that are built in already into DC.
+    
+        dc.pieChart('#per-person-chart')
+            .height(330)
+            .radius(90)
+            .transitionDuration(1500)
+            .dimension(name_dim)
+            .group(total_spend_per_person);
+            
+        //Plucking store dimension and we're grouping by Store and we target the store div we change our dimension and we change our group don't forget to make these changes otherwise you'll get funny-looking data.
+        var store_dim = ndx.dimension(dc.pluck('store'));
+        var total_spend_per_store = store_dim.group().reduceSum(dc.pluck('spend'));
+        
+        
+        //  Nice easing functions those transitions and translations and transformations that are built in already into DC.
+        dc.pieChart('#per-store-chart')
+            .height(330)
+            .radius(90)
+            .transitionDuration(1500)
+            .dimension(store_dim)
+            .group(total_spend_per_store);
+            
+         //  Finally we're plucking our State Dimension and we will create a pie chart, which represents penned by state. Then we change our variables - total spend per state and state dimension. Again what remains is the reduce sum, were always basing it on spend. And there we have 3 different pie charts, and because our transactions.JSON file contains more than 3 states, they're represented on the pie chart.
+        
+        var state_dim = ndx.dimension(dc.pluck('state'));
+        var total_spend_per_state = state_dim.group().reduceSum(dc.pluck('spend'));
+        
+        
+        //  Nice easing functions those transitions and translations and transformations that are built in already into DC.
+        dc.pieChart('#per-state-chart')
+            .height(330)
+            .radius(90)
+            .transitionDuration(1500)
+            .dimension(state_dim)
+            .group(total_spend_per_state);
+            
+        //  Don't forget to call render all to view the chart. Let's view it now and you see the nice way that they the Charter is rendered you get what are called nice easing functions those transitions and translations and transformations that are built in already into DC for you.  They look well once we have that.
+    
+
+        dc.renderAll();
+    }
+    </script>
+</body>
+</html>
